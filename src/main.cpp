@@ -9,6 +9,7 @@
 // #include <TimerAlarms.h>
 // * In Definitions.h we #define Serial enable/disable and diferent setings (parameters)!
 #include "Definitions.h"
+#include "Private.h"
 #include "Relay.h"
 
 // MAC address for the controller
