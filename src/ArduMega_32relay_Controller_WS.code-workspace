@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"name": "ArduMQTTOpenHab_Relay_Controler",
+			"path": "D:\\Users\\Stefan Shivarov\\Documents\\PlatformIO\\Projects\\ArduMQTTOpenHab_Relay_Controler"
+		},
+		{
+			"path": "D:\\Users\\Stefan Shivarov\\Documents\\PlatformIO\\Projects\\Control_Candy_Dispenser_ROS"
+		},
+		{
+			"path": "D:\\Users\\Stefan Shivarov\\Documents\\PlatformIO\\Projects\\Mailbox_sensor_OpenHAB_OTA"
+		},
+		{
+			"path": "D:\\Users\\Stefan Shivarov\\Documents\\PlatformIO\\Projects\\watering_controler_nodemcu"
+		}
+	],
+	"settings": {}
+}
