@@ -42,7 +42,7 @@ byte mac[] = {
   void mqtt_callback(char* topic, byte* payload, unsigned int length);
 // MQTT publish STAT message
   void mqtt_publish_stat_message(char* topic, char* payload);
-
+  void mqttPublishStatAllmessage();
 // char* string manipulation
 int stringToInteger(const char *inputstr);  
 
@@ -115,8 +115,9 @@ void setup()
 
 ////
   //! Oboard LED will be ON in case of lost connetion to the MQTT server
-  //! pinMode(LED_BUILTIN, OUTPUT);
-  //! digitalWrite(LED_BUILTIN, HIGH);
+   pinMode(LED_BUILTIN, OUTPUT);
+  //  digitalWrite(LED_BUILTIN, HIGH); //LED ON
+      digitalWrite(LED_BUILTIN, LOW); // LED OFF
 
   // Ethernet.init(pin) to configure the CS pin on the Ethernet shield
   // Ethernet.init(10);  // we use the default pin 10 / no need to set it up
@@ -213,8 +214,8 @@ void loop()
       Sprintln("New MQTT connection attempt..." );  
       if (mqtt_reconnect()) {
         lastReconnectAttempt = 0;
-        previous_stat_msgs_Millis = 0; // Schedule next STAT publish in mqtt_stat_msgs_interval
         now = millis(); // Get current millis
+        previous_stat_msgs_Millis = now; // Schedule next STAT publish in mqtt_stat_msgs_interval
         Sprintln(" Connection to MQTT server successful! " );
         
         digitalWrite(LED_BUILTIN, LOW);
@@ -229,13 +230,13 @@ void loop()
 
 //TODO Process sensors if any
 
-// Send stat message every mqtt_periodic_stat_msgs_period with timer
-    // if (now - previous_stat_msgs_Millis > mqtt_stat_msgs_interval) {
-    //   mqtt_publish_stat_message();  // Publish mqtt STAT message
-    //   previous_stat_msgs_Millis = 0; // Schedule next STAT publish in mqtt_stat_msgs_interval
-    //   Sprintln(" Stat message published to mqtt server! " );
+// Send periodic stat message every mqtt_periodic_stat_msgs_period with timer
+    if (now - previous_stat_msgs_Millis > mqtt_stat_msgs_interval) {
+      mqttPublishStatAllmessage();  // Publish mqtt STAT message
+      previous_stat_msgs_Millis = now; // Schedule next STAT publish in mqtt_stat_msgs_interval
+      Sprintln(" Stat message published to mqtt server! " );
 
-    //  }
+     }
 ////
 }// END loop
 ////
@@ -356,17 +357,38 @@ void loop()
 
 // Publish STAT MQTT message
   void mqtt_publish_message(char* out_topic, char* payload){
+             digitalWrite(LED_BUILTIN, HIGH);
+
         mqttClient.publish(out_topic, payload);
         Sprint("Message published on "); 
         Sprint(out_topic); 
         Sprint(" topic with payload: ");
         Sprintln(payload); 
+         digitalWrite(LED_BUILTIN, LOW);
+
     }  
 //! Periodic stat example:
 //! {"Time":"2020-02-09T19:25:44","Uptime":"3T06:15:04","UptimeSec":281704,"Heap":28,"SleepMode":"Dynamic","Sleep":50,"LoadAvg":19,"MqttCount":8,"POWER1":"OFF","POWER2":"OFF","POWER3":"OFF","POWER4":"OFF","Wifi":{"AP":1,"SSId":"code","BSSId":"F8:D1:11:3B:4B:16","Channel":9,"RSSI":100,"LinkCount":1,"Downtime":"0T00:00:37"}}
-// void mqttPublishRESULTmessage(bool state) {
-//   mqttClient.publish("stat/WiFi_Mailbox_sensor/MailboxDoor", state ? "CLOSED" : "OPEN");
-// }
+void mqttPublishStatAllmessage() {
+        //???? Publish initial STAT message to mqtt_stat_topic for each relay 
+         digitalWrite(LED_BUILTIN, HIGH);
+        for (size_t relay_number = 0; relay_number < ((sizeof(ssrPins) / sizeof(int))+(sizeof(relayPins) / sizeof(int))); relay_number++)
+        // for (size_t i = 0; i < MAX_NUMBER_OF_RELAYS; i++)
+        {
+          char stat_topic[37] = "stat/ardu_mega_heating_ctrl_1/POWER"; // cmnd/ardu_mega_heating_ctrl_1/POWER is 35 chars + 2 chars for - and \0
+          char buf[4]; // "-32\0"
+          itoa(relay_number,buf,10);
+          strcat((char*) stat_topic,(char*) buf);
+          Sprint("Publishing periodic state message: ");
+          Sprintln(stat_topic);
+
+          mqttClient.publish(stat_topic, (relay[relay_number].state()) ? "ON" : "OFF");
+        }
+      
+      digitalWrite(LED_BUILTIN, LOW);
+        // ! end   publish the state of all relays on mqtt reconect!!!
+      }
+
 
 
 // Handle incomming MQTT messages
