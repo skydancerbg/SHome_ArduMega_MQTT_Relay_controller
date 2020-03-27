@@ -2,6 +2,7 @@
 
 #define DEBUG
 
+
 #ifdef DEBUG
 //https://arduino.stackexchange.com/questions/9857/can-i-make-the-arduino-ignore-serial-print
 //If you insist on top performance, the best thing would be to use a macro for that:
